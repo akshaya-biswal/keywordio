@@ -1,97 +1,107 @@
-import { useMemo } from "react";
-import {
-  MaterialReactTable,
-  useMaterialReactTable,
-} from "material-react-table";
+import { useTable, useSortBy } from "react-table";
 
-//nested data is ok, see accessorKeys in ColumnDef below
-const data = [
-  {
-    name: {
-      firstName: "John",
-      lastName: "Doe",
-    },
-    address: "261 Erdman Ford",
-    city: "East Daphne",
-    state: "Kentucky",
-  },
-  {
-    name: {
-      firstName: "Jane",
-      lastName: "Doe",
-    },
-    address: "769 Dominic Grove",
-    city: "Columbus",
-    state: "Ohio",
-  },
-  {
-    name: {
-      firstName: "Joe",
-      lastName: "Doe",
-    },
-    address: "566 Brakus Inlet",
-    city: "South Linda",
-    state: "West Virginia",
-  },
-  {
-    name: {
-      firstName: "Kevin",
-      lastName: "Vandy",
-    },
-    address: "722 Emie Stream",
-    city: "Lincoln",
-    state: "Nebraska",
-  },
-  {
-    name: {
-      firstName: "Joshua",
-      lastName: "Rolluffs",
-    },
-    address: "32188 Larkin Turnpike",
-    city: "Charleston",
-    state: "South Carolina",
-  },
-];
+// eslint-disable-next-line react/prop-types
+const Table = ({ columns, data }) => {
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
+    useTable({ columns, data }, useSortBy);
 
-const Example = () => {
-  //should be memoized or stable
-  const columns = useMemo(
-    () => [
-      {
-        accessorKey: "name.firstName", //access nested data with dot notation
-        header: "First Name",
-        size: 150,
-      },
-      {
-        accessorKey: "name.lastName",
-        header: "Last Name",
-        size: 150,
-      },
-      {
-        accessorKey: "address", //normal accessorKey
-        header: "Address",
-        size: 200,
-      },
-      {
-        accessorKey: "city",
-        header: "City",
-        size: 150,
-      },
-      {
-        accessorKey: "state",
-        header: "State",
-        size: 150,
-      },
-    ],
-    []
+  return (
+    <table
+      {...getTableProps()}
+      style={{ border: "1px solid black", width: "100%" }}
+    >
+      <thead>
+        {headerGroups.map((headerGroup, i) => (
+          <tr key={i} {...headerGroup.getHeaderGroupProps()}>
+            {headerGroup.headers.map((column, j) => (
+              <th
+                key={j}
+                {...column.getHeaderProps(column.getSortByToggleProps())}
+              >
+                {column.render("Header")}
+                <span>
+                  {column.isSorted ? (column.isSortedDesc ? " 🔽" : " 🔼") : ""}
+                </span>
+              </th>
+            ))}
+          </tr>
+        ))}
+      </thead>
+      <tbody {...getTableBodyProps()}>
+        {rows.map((row, i) => {
+          prepareRow(row);
+          return (
+            <tr key={i} {...row.getRowProps()}>
+              {row.cells.map((cell, j) => (
+                <td key={j} {...cell.getCellProps()}>
+                  {cell.render("Cell")}
+                </td>
+              ))}
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
   );
-
-  const table = useMaterialReactTable({
-    columns,
-    data, //data must be memoized or stable (useState, useMemo, defined outside of this component, etc.)
-  });
-
-  return <MaterialReactTable table={table} />;
 };
 
-export default Example;
+// Example usage
+const SortingTable = () => {
+  const columns = [
+    {
+      Header: "Campaigns",
+      accessor: "campaigns",
+    },
+    {
+      Header: "Clicks",
+      accessor: "clicks",
+    },
+    {
+      Header: "Cost",
+      accessor: "cost",
+    },
+    {
+      Header: "Conversions",
+      accessor: "conversions",
+    },
+    {
+      Header: "Revenue",
+      accessor: "revenue",
+    },
+  ];
+
+  const data = [
+    {
+      campaigns: "Hello",
+      clicks: 10,
+      cost: "INR",
+      conversions: 20,
+      revenue: 343,
+    },
+    {
+      campaigns: "World",
+      clicks: 100,
+      cost: "INR",
+      conversions: 20,
+      revenue: 565,
+    },
+    {
+      campaigns: "Earth",
+      clicks: 1000,
+      cost: "INR",
+      conversions: 20,
+      revenue: 2343,
+    },
+    {
+      campaigns: "Asia",
+      clicks: 10000,
+      cost: "INR",
+      conversions: 20,
+      revenue: 6787753,
+    },
+  ];
+
+  return <Table columns={columns} data={data} />;
+};
+
+export default SortingTable;
